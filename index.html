@@ -3,69 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Tug of War - Deluxe</title>
+    <title>Math Tug of War - Battle Edition</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #87CEEB; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        #game-box { width: 90%; max-width: 800px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
+        body { font-family: 'Arial', sans-serif; background: #87CEEB; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #game-box { width: 95%; max-width: 900px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
         
-        /* Start Screen */
+        /* Menu */
         #menu { display: block; }
         #game-play { display: none; }
-        .btn-big { font-size: 24px; padding: 20px 40px; margin: 10px; cursor: pointer; border: none; border-radius: 50px; transition: transform 0.2s; }
-        .pvc-btn { background: #FF9800; color: white; }
-        .pvp-btn { background: #2196F3; color: white; }
+        .btn-big { font-size: 24px; padding: 20px 40px; margin: 10px; cursor: pointer; border: none; border-radius: 50px; background: #2196F3; color: white; transition: transform 0.2s; }
         .btn-big:hover { transform: scale(1.1); }
 
-        /* The Tug Field */
-        #field { position: relative; height: 150px; background: #7cfc00; border-radius: 10px; border-bottom: 8px solid #55a600; margin: 20px 0; display: flex; align-items: center; }
-        #rope { position: absolute; width: 100%; height: 6px; background: #8B4513; top: 50%; left: 0; z-index: 1; }
+        /* Tug Field */
+        #field { position: relative; height: 120px; background: #7cfc00; border-radius: 10px; border-bottom: 8px solid #55a600; margin: 20px 0; overflow: hidden; }
+        #rope { position: absolute; width: 100%; height: 6px; background: #8B4513; top: 50%; left: 0; }
+        .player { position: absolute; font-size: 60px; top: 20px; transition: all 0.2s ease-out; }
+        #p1-char { left: 10%; transform: scaleX(-1); }
+        #p2-char { right: 10%; }
+        #marker { position: absolute; width: 12px; height: 40px; background: red; left: 50%; top: -15px; border-radius: 5px; }
+
+        /* Two Sided Controls */
+        #battle-ground { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; }
+        .control-side { flex: 1; padding: 20px; border-radius: 15px; background: #f9f9f9; border: 3px solid #ddd; }
+        .p1-side { border-color: #2196F3; }
+        .p2-side { border-color: #f44336; }
         
-        .player { position: absolute; font-size: 50px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2; top: 40px; }
-        #p1-char { left: 20%; transform: scaleX(-1); } /* Flip to face right */
-        #p2-char { right: 20%; }
-
-        #marker { position: absolute; width: 10px; height: 30px; background: red; left: 50%; top: -12px; }
-
-        /* Math UI */
-        #question-display { font-size: 32px; font-weight: bold; margin-bottom: 15px; }
-        input { font-size: 28px; width: 100px; text-align: center; border: 3px solid #ddd; border-radius: 10px; }
-        #turn-msg { font-size: 20px; color: #555; font-weight: bold; margin-bottom: 5px; }
+        .q-text { font-size: 28px; font-weight: bold; margin-bottom: 10px; display: block; }
+        input { font-size: 24px; width: 80%; padding: 10px; text-align: center; border-radius: 8px; border: 2px solid #ccc; }
+        
+        .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
     </style>
 </head>
 <body>
 
 <div id="game-box">
     <div id="menu">
-        <h1>Math Tug of War</h1>
-        <p>Choose your challenge:</p>
-        <button class="btn-big pvc-btn" onclick="startGame('pvc')">Solo vs Computer</button>
-        <button class="btn-big pvp-btn" onclick="startGame('pvp')">2 Players (Human)</button>
+        <h1>Math Tug Battle!</h1>
+        <button class="btn-big" onclick="startGame('pvc')">Solo vs Computer</button>
+        <button class="btn-big" onclick="startGame('pvp')">2 Player Battle</button>
     </div>
 
     <div id="game-play">
-        <div id="turn-msg">Player 1's Turn</div>
-        
         <div id="field">
             <div id="rope"><div id="marker"></div></div>
             <div id="p1-char" class="player">🏃</div>
             <div id="p2-char" class="player">🏃</div>
         </div>
 
-        <div id="question-display">...</div>
-        <input type="number" id="ans" placeholder="?" autocomplete="off">
-        <p id="hint">Press Enter to Pull!</p>
+        <div id="battle-ground">
+            <div class="control-side p1-side">
+                <h3>Player 1</h3>
+                <span id="p1-q" class="q-text">--</span>
+                <input type="number" id="p1-ans" placeholder="?" autocomplete="off">
+            </div>
+
+            <div class="control-side p2-side">
+                <h3 id="p2-label">Player 2</h3>
+                <span id="p2-q" class="q-text">--</span>
+                <input type="number" id="p2-ans" placeholder="?" autocomplete="off">
+            </div>
+        </div>
     </div>
+</div>
+
+<div id="winner-screen" class="winner-overlay">
+    <h1 id="winner-text">Winner!</h1>
+    <button class="btn-big" onclick="location.reload()">Play Again</button>
 </div>
 
 <script>
     let mode = '';
-    let p1Pos = 20; // Starting % from left
-    let p2Pos = 20; // Starting % from right
-    let ropeOffset = 0; // Shift from center
-    let currentPlayer = 1;
-    let num1, num2, answer;
+    let ropeOffset = 0;
+    let p1Q = {a:0, b:0, ans:0};
+    let p2Q = {a:0, b:0, ans:0};
 
     function startGame(chosenMode) {
         mode = chosenMode;
         document.getElementById('menu').style.display = 'none';
-        document.getElementById('game-play').style
+        document.getElementById('game-play').style.display = 'block';
+        
+        if(mode === 'pvc') {
+            document.getElementById('p2-label').innerText = "Computer (AI)";
+            document.getElementById('p2-char').innerText = "🤖";
+            document.getElementById('p2-ans').disabled = true;
+            document.getElementById('p2-ans').placeholder = "AI Thinking...";
+            setInterval(cpuLogic, 3000); // Computer pulls every 3 seconds
+        }
+
+        genQ(1);
+        genQ(2);
+    }
+
+    function genQ(player) {
+        let n1 = Math.floor(Math.random() * 10) + 1;
+        let n2 = Math.floor(Math.random() * 10) + 1;
+        if (player === 1) {
+            p1Q = {a:n1, b:n2, ans: n1+n2};
+            document.getElementById('p1-q').innerText = `${n1} + ${n2}`;
+            document.getElementById('p1-ans').value = '';
+        } else {
+            p2Q = {a:n1, b:n2, ans: n1+n2};
+            document.getElementById('p2-q').innerText = `${n1} + ${n2}`;
+            document.getElementById('p2-ans').value = '';
+        }
+    }
+
+    // Input Listeners
+    document.getElementById('p1-ans').addEventListener('input', function() {
+        if (parseInt(this.value) === p1Q.ans) {
+            pull(1);
+            genQ(1);
+        }
+    });
+
+    document.getElementById('p2-ans').addEventListener('input', function() {
+        if (parseInt(this.value) === p2Q.ans) {
+            pull(2);
+            genQ(2);
+        }
+    });
+
+    function cpuLogic() {
+        if (mode === 'pvc') {
+            pull(2);
+            genQ(2);
+        }
+    }
+
+    function pull(player) {
+        ropeOffset += (player === 1 ? 5 : -5);
+        updateVisuals();
+    }
+
+    function updateVisuals() {
+        document.getElementById('marker').style.left = (50 + ropeOffset) + "%";
+        document.getElementById('p1-char').style.left = (10 + ropeOffset) + "%";
+        document.getElementById('p2-char').style.right = (10 - ropeOffset) + "%";
+
+        if (ropeOffset >= 40) endMove("Player 1 Wins! 🎉");
+        if (ropeOffset <= -40) endMove(mode === 'pvc' ? "Computer Wins! 🤖" : "Player 2 Wins! 🎉");
+    }
+
+    function endMove(msg) {
+        document.getElementById('winner-screen').style.display = 'flex';
+        document.getElementById('winner-text').innerText = msg;
+    }
+</script>
+
+</body>
+</html>
