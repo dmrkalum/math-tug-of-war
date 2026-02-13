@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Tug of War</title>
+    <style>
+        /* CSS: Making it look like a game */
+        body { font-family: 'Arial', sans-serif; text-align: center; background: #f0f4f8; }
+        #game-container { max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        #rope-container { position: relative; width: 100%; height: 60px; background: #eee; border-radius: 30px; margin: 40px 0; overflow: hidden; border: 4px solid #333; }
+        #rope { position: absolute; width: 200%; height: 10px; background: #8d6e63; top: 25px; left: -50%; transition: all 0.5s ease; }
+        #marker { position: absolute; width: 40px; height: 40px; background: #ff5252; top: 10px; left: 50%; transform: translateX(-50%); border-radius: 50%; border: 4px solid white; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .goal { position: absolute; top: 0; width: 10%; height: 100%; background: rgba(0,255,0,0.2); }
+        #goal-left { left: 0; border-right: 2px dashed green; }
+        #goal-right { right: 0; border-left: 2px dashed green; }
+
+        #math-box { font-size: 24px; margin-bottom: 20px; }
+        input { font-size: 24px; width: 80px; padding: 10px; text-align: center; border: 2px solid #ddd; border-radius: 8px; }
+        button { font-size: 20px; padding: 10px 25px; background: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>Math Tug!</h1>
+    <p>Get it right to pull the red marker to the right!</p>
+
+    <div id="rope-container">
+        <div id="goal-left" class="goal"></div>
+        <div id="goal-right" class="goal"></div>
+        <div id="rope"></div>
+        <div id="marker"></div>
+    </div>
+
+    <div id="math-box">
+        <span id="question">Loading...</span>
+        <br><br>
+        <input type="number" id="answer" autofocus>
+        <button onclick="checkAnswer()">PULL!</button>
+    </div>
+    
+    <p id="feedback"></p>
+</div>
+
+<script>
+    // JavaScript: The Game Brain
+    let position = 50; // Start in the middle (50%)
+    let num1, num2, correctAnswer;
+
+    function newQuestion() {
+        num1 = Math.floor(Math.random() * 12) + 1;
+        num2 = Math.floor(Math.random() * 12) + 1;
+        correctAnswer = num1 + num2;
+        document.getElementById('question').innerText = `${num1} + ${num2} = ?`;
+        document.getElementById('answer').value = '';
+        document.getElementById('answer').focus();
+    }
+
+    function checkAnswer() {
+        let userAns = parseInt(document.getElementById('answer').value);
+        let marker = document.getElementById('marker');
+        let feedback = document.getElementById('feedback');
+
+        if (userAns === correctAnswer) {
+            position += 8; // Move right for correct
+            feedback.innerText = "Strong pull! 💪";
+            feedback.style.color = "green";
+        } else {
+            position -= 5; // Slip left for wrong
+            feedback.innerText = "Oops, you slipped! 😮";
+            feedback.style.color = "red";
+        }
+
+        // Update visual position
+        marker.style.left = position + "%";
+
+        // Check Win/Loss
+        if (position >= 90) {
+            alert("YOU WIN! You pulled them into the mud!");
+            resetGame();
+        } else if (position <= 10) {
+            alert("GAME OVER! The computer won this time.");
+            resetGame();
+        } else {
+            newQuestion();
+        }
+    }
+
+    function resetGame() {
+        position = 50;
+        document.getElementById('marker').style.left = "50%";
+        newQuestion();
+    }
+
+    // Allow "Enter" key to submit
+    document.getElementById('answer').addEventListener("keyup", function(event) {
+        if (event.key === "Enter") checkAnswer();
+    });
+
+    newQuestion();
+</script>
+
+</body>
+</html>
